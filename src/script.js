@@ -260,6 +260,7 @@ world.addBody(floorBody);
 
 // Функционал-----------------------------------------------------------------
 
+
 // const geometry = new THREE.BoxGeometry(1, 1, 1);
 // const geometry = new THREE.TorusGeometry(1000, 500, 16, 40);
 // const material = new THREE.MeshBasicMaterial({
