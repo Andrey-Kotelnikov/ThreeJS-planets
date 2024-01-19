@@ -21,7 +21,7 @@ document.body.appendChild(stats.dom);
 
 // Оси координат
 const axesHelper = new THREE.AxesHelper(5000)
-scene.add(axesHelper);
+// scene.add(axesHelper);
 
 
 // Текстуры -------------------------------------------------------------
@@ -64,12 +64,6 @@ const sunTexture = textureLoader.load('/textures/sun.jpg');
 
 // Свет -----------------------------------------------------------------
 
-/*const lightParameters = {
-	skyColor: 0xFFFFFF,
-	groundColor: 0x222222,
-	intensity: 2,
-}*/
-
 // Создание направленного источника света
 const light = new THREE.DirectionalLight(0xffffff, 0.5);
 light.position.set(-8000, 5000, 5000);
@@ -84,7 +78,7 @@ light.shadow.camera.near = 1; // ближняя плоскость тени
 light.shadow.camera.far = 30000; // дальняя плоскость тени
 
 scene.add(light);
-scene.add(light.target);
+// scene.add(light.target);
 
 // Создание точечного источника света внутри солнца
 const pointLight = new THREE.PointLight(0xffedcd, 0.03, 10000);
@@ -99,17 +93,18 @@ scene.add(pointHelper);
 
 // Вектор направленного света
 const helper = new THREE.DirectionalLightHelper(light);
-scene.add(helper);
+// scene.add(helper);
 
 // Отличная визуализация теневой карты напрвленного света
 const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
-scene.add(cameraHelper);
+// scene.add(cameraHelper);
 
 
 // Меши ----------------------------------------------------------------------
 
 // Пол (трава)
-const floorGeometry = new THREE.PlaneGeometry(10000, 10000, 10, 10);
+const floorGeometry = new THREE.BoxGeometry(10000, 10000, 10);
+// const floorGeometry = new THREE.PlaneGeometry(10000, 10000, 10, 10);
 const floorMaterial = new THREE.MeshPhongMaterial({
 	// color: 'gray',
 	// wireframe: true,
@@ -118,16 +113,18 @@ const floorMaterial = new THREE.MeshPhongMaterial({
 });
 const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
 floorMesh.rotation.x = -Math.PI / 2;
+// floorMesh.position.set(0, -10, 0)
 floorMesh.receiveShadow = true;
 scene.add(floorMesh);
 
 // Стены
-const wallGeometry = new THREE.PlaneGeometry(10000, 1000)
+const wallGeometry = new THREE.BoxGeometry(10000, 1000, 10);
+// const wallGeometry = new THREE.PlaneGeometry(10000, 1000)
 const wallMaterial = new THREE.MeshPhongMaterial({
 	// color: 'gray',
 	// wireframe: true,
 	map: brickWallTexture,
-	side: THREE.DoubleSide,
+	// side: THREE.DoubleSide,
 });
 const wallMesh1 = new THREE.Mesh(wallGeometry, wallMaterial);
 wallMesh1.position.set(0, 500, 5000);
@@ -190,6 +187,36 @@ const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
 sunMesh.position.set(0, 800, 0)
 scene.add(sunMesh);
 
+// Падающая сфера1
+const sphereGeo = new THREE.SphereGeometry(100);
+const sphereMat = new THREE.MeshPhongMaterial({ color: 'red' });
+const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+// sphere.position.set(0, 5, 0);
+sphere.castShadow = true;
+sphere.receiveShadow = true;
+scene.add(sphere);
+
+// Падающая сфера2
+const sphereGeo2 = new THREE.SphereGeometry(150);
+const sphereMat2 = new THREE.MeshPhongMaterial({ color: 'yellow' });
+const sphere2 = new THREE.Mesh(sphereGeo2, sphereMat2);
+// sphere.position.set(0, 5, 0);
+sphere2.castShadow = true;
+sphere2.receiveShadow = true;
+scene.add(sphere2);
+
+// Падающий куб
+const cubeGeo = new THREE.BoxGeometry(80, 100, 60);
+const cubeMat = new THREE.MeshPhongMaterial({
+	color: 'gray',
+	// wireframe: true,
+});
+const cube = new THREE.Mesh(cubeGeo, cubeMat);
+// mesh.position.set(0, 1, 0);
+cube.castShadow = true;
+cube.receiveShadow = true;
+scene.add(cube)
+
 
 // Настройка теней------------------------------------------------------------------
 earthMesh.castShadow = true; // Отбрасывает тень
@@ -243,7 +270,7 @@ loader.load(
 
 // World
 const world = new CANNON.World();
-world.gravity.set(0, -9.8, 0);
+world.gravity.set(0, -981, 0); // увеличено в 100 раз для масштаба
 
 // CannonDebugRenderer
 const cannonDebugRenderer = new CannonDebugRenderer(scene, world);
@@ -251,24 +278,80 @@ const cannonDebugRenderer = new CannonDebugRenderer(scene, world);
 // Пол
 const floorBody = new CANNON.Body({
 	mass: 0,
+	// position: new CANNON.Vec3(0, -10, 0),
 })
-let floorShape = new CANNON.Plane(0.1, 0.2)
+const floorShape = new CANNON.Box(new CANNON.Vec3(5000, 5000, 5))
 floorBody.addShape(floorShape);
-floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2)
+floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
 world.addBody(floorBody);
+
+// Стены--------------------------
+const wallShape = new CANNON.Box(new CANNON.Vec3(5000, 500, 5));
+
+// Ближняя
+const nearWallBody = new CANNON.Body({
+	mass: 0,
+	shape: wallShape,
+	// position: new CANNON.Vec3(0, -10, 0),
+})
+nearWallBody.position.set(0, 500, 5000);
+world.addBody(nearWallBody);
+
+// Дальняя
+const farWallBody = new CANNON.Body({
+	mass: 0,
+	shape: wallShape,
+})
+farWallBody.position.set(0, 500, -5000);
+world.addBody(farWallBody);
+
+// Правая
+const rightWallBody = new CANNON.Body({
+	mass: 0,
+	shape: wallShape,
+})
+rightWallBody.position.set(5000, 500, 0);
+rightWallBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), -Math.PI / 2);
+world.addBody(rightWallBody);
+
+// Левая
+const leftWallBody = new CANNON.Body({
+	mass: 0,
+	shape: wallShape,
+})
+leftWallBody.position.set(-5000, 500, 0);
+leftWallBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), -Math.PI / 2);
+world.addBody(leftWallBody);
+
+// Сфера1
+const sphereShape = new CANNON.Sphere(100);
+const sphereBody = new CANNON.Body({
+	mass: 100,
+	shape: sphereShape,
+	position: new CANNON.Vec3(-2000, 4000, 1970),
+});
+world.addBody(sphereBody);
+
+// Сфера2
+const sphereShape2 = new CANNON.Sphere(150);
+const sphereBody2 = new CANNON.Body({
+	mass: 100,
+	shape: sphereShape2,
+	position: new CANNON.Vec3(-2000, 6000, 1970),
+});
+world.addBody(sphereBody2);
+
+// Куб
+const cubeBody = new CANNON.Body({
+	mass: 90,
+	position: new CANNON.Vec3(-2000, 2000, 2000),
+});
+const cubeShape = new CANNON.Box(new CANNON.Vec3(40, 50, 30));
+cubeBody.addShape(cubeShape);
+world.addBody(cubeBody);
 
 
 // Функционал-----------------------------------------------------------------
-
-
-// const geometry = new THREE.BoxGeometry(1, 1, 1);
-// const geometry = new THREE.TorusGeometry(1000, 500, 16, 40);
-// const material = new THREE.MeshBasicMaterial({
-// 	color: 'gray',
-// 	wireframe: true,
-// });
-// const mesh = new THREE.Mesh(geometry, material);
-// scene.add(mesh);
 
 const clock = new THREE.Clock();
 
@@ -287,6 +370,23 @@ const tick = () => {
 	if (mixer) {
 		mixer.update(delta * 0.5);
 	}
+
+	// отображение дебагера
+	// cannonDebugRenderer.update();
+
+	world.step(1 / 60);
+
+	// Обновление сферы1
+	sphere.position.copy(sphereBody.position)
+	sphere.quaternion.copy(sphereBody.quaternion)
+
+	// Обновление сферы2
+	sphere2.position.copy(sphereBody2.position)
+	sphere2.quaternion.copy(sphereBody2.quaternion)
+
+	// Обновление куба
+	cube.position.copy(cubeBody.position);
+	cube.quaternion.copy(cubeBody.quaternion);
 
 	controls.update();
 	renderer.render(scene, camera);
@@ -341,4 +441,3 @@ function handleKeyDown (event) {
 			break;
 	}
 }
-
