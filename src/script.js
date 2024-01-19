@@ -8,6 +8,14 @@ import CannonDebugRenderer from 'cannon-es-debugger'
 // import ColorGUIHelper from './ColorGUIHelper';
 import './style.css';
 
+import brickImg from '../static/textures/brick-8.jpg';
+import grassImg from '../static/textures/grass.jpg';
+import sunImg from '../static/textures/sun.jpg';
+import earthImg from '../static/textures/Earth.jpg';
+import moonImg from '../static/textures/moon.jpg';
+
+// import robotModel from '../static/models/BrainStem/BrainStem.gltf'
+
 const { sizes, camera, scene, canvas, controls, renderer } = init();
 
 camera.position.set(0, 5000, 15000);
@@ -25,6 +33,13 @@ const axesHelper = new THREE.AxesHelper(5000)
 
 
 // Текстуры -------------------------------------------------------------
+const textures = [
+	{ name: 'brick', link: brickImg },
+	{ name: 'grass', link: grassImg },
+	{ name: 'earth', link: earthImg },
+	{ name: 'sun', link: sunImg },
+	{ name: 'moon', link: moonImg },
+]
 
 const loadingManager = new THREE.LoadingManager();
 loadingManager.onStart = () => {
@@ -45,21 +60,21 @@ loadingManager.onError = () => {
 
 const textureLoader = new THREE.TextureLoader(loadingManager);
 
-const grassTexture = textureLoader.load('/textures/grass.jpg');
+const grassTexture = textureLoader.load(grassImg);
 
 grassTexture.wrapS = THREE.RepeatWrapping;
 grassTexture.wrapT = THREE.RepeatWrapping;
 grassTexture.repeat.set(10, 10);
 
-const brickWallTexture = textureLoader.load('/textures/brick-8.jpg');
+const brickWallTexture = textureLoader.load(brickImg);
 
 brickWallTexture.wrapS = THREE.RepeatWrapping;
 brickWallTexture.wrapT = THREE.RepeatWrapping;
 brickWallTexture.repeat.set(6, 1);
 
-const earthTexture = textureLoader.load('/textures/Earth.jpg');
-const moonTexture = textureLoader.load('/textures/moon.jpg');
-const sunTexture = textureLoader.load('/textures/sun.jpg');
+const earthTexture = textureLoader.load(earthImg);
+const moonTexture = textureLoader.load(moonImg);
+const sunTexture = textureLoader.load(sunImg);
 
 
 // Свет -----------------------------------------------------------------
