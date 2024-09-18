@@ -23,4 +23,4 @@
     npm run dev
     ```
 ## Демо проекта
-https://andrey-kotelnikov.github.io/ThreeJS/
+https://andrey-kotelnikov.github.io/ThreeJS-planets/
